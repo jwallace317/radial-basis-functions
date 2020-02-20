@@ -2,8 +2,8 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-# import kmeans custom class
-from kmeans import Kmeans
+# import radial basis function neural network class
+from rbf_network import RBFNeuralNetwork
 
 
 # main
@@ -13,26 +13,30 @@ def main():
     y = 0.5 + 0.4 * np.sin(3 * np.pi * x)
 
     # generate uniform distribution features vector
-    features = np.sort(np.random.uniform(0, 1, (75, 1)), axis=0)
+    features = np.sort(np.random.uniform(0, 1, (9, 1)), axis=0)
 
     # generate uniform distribution noise vector
-    noise = np.random.uniform(-0.1, 0.1, (75, 1))
+    noise = np.random.uniform(-0.1, 0.1, (9, 1))
 
     # generate the targets vector with added noise
     targets = 0.5 + 0.4 * np.sin(3 * np.pi * features) + noise
 
-    kmeans = Kmeans(n_clusters=4)
+    # instantiate radial basis function neural network
+    rbf_nn = RBFNeuralNetwork(n_clusters=3, max_epochs=100)
 
-    kmeans.fit(features)
+    # train the hidden layer of the rbf nn using kmeans algorithm
+    rbf_nn.train_hidden_layer(features)
 
     print(f'features = { features[0:10] }')
-    centroids = kmeans.centroids
-    print(f'centroids = { centroids[0:4] }')
+    centroids = rbf_nn.centroids
+    print(f'centroids = { centroids[0:3] }')
 
-    yf = np.linspace(0, 0, 75)
+    rbf_nn.compute_gaussians(features[0])
+
+    yf = np.linspace(0, 0, 9)
     plt.scatter(features, yf, color='red')
 
-    yc = np.linspace(0, 0, 4)
+    yc = np.linspace(0, 0, 3)
     plt.scatter(centroids, yc, color='black')
 
     plt.show()
