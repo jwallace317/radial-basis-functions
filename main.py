@@ -12,53 +12,54 @@ def main():
     x = np.linspace(0, 1, 1000)
     y = 0.5 + 0.4 * np.sin(3 * np.pi * x)
 
-    # generate uniform distribution features vector
+    # generate uniform distribution in [0, 1) features vector
     features = np.sort(np.random.uniform(0, 1, (75, 1)), axis=0)
 
-    # generate uniform distribution noise vector
+    # generate uniform distribution in [-0.1, 0.1) noise vector
     noise = np.random.uniform(-0.1, 0.1, (75, 1))
 
     # generate the targets vector with added noise
     targets = 0.5 + 0.4 * np.sin(3 * np.pi * features) + noise
 
-    # instantiate radial basis function neural network
-    rbf_nn = RBFNeuralNetwork(n_clusters=70, max_epochs=400)
+    n_clusters = [3, 6, 8, 12, 16]
+    learning_rates = [0.01, 0.02]
 
-    # train the hidden layer of the rbf nn using kmeans algorithm
-    rbf_nn.train_hidden_layer(features)
+    for learning_rate in learning_rates:
+        for k in n_clusters:
 
-    print(f'features = { features[0:10] }')
-    centroids = rbf_nn.centroids
-    print(f'centroids = { centroids[0:40] }')
+            # instantiate radial basis function neural network
+            rbf_nn = RBFNeuralNetwork(
+                n_clusters=k, max_epochs=100, learning_rate=learning_rate)
 
-    rbf_nn.train_output_layer(features, targets)
+            # train the hidden layer
+            rbf_nn.train_hidden_layer(features)
 
-    # clustering  graph
-    # yf = np.linspace(0, 0, 9)
-    # plt.scatter(features, yf, color='red')
-    #
-    # yc = np.linspace(0, 0, 3)
-    # plt.scatter(centroids, yc, color='black')
-    #
-    # plt.show()
+            # train the output layer
+            rbf_nn.train_output_layer(features, targets)
 
-    predicted = rbf_nn.predict(features)
+            # predict the targets given the features
+            predicted = rbf_nn.predict(features)
 
-    plt.scatter(features, targets, color='red')
-    plt.scatter(features, predicted, color='blue')
-    plt.plot(x, y, color='black')
-    plt.show()
+            # compute the sum of squared errors
+            sse = rbf_nn.compute_sse(features, targets).item()
 
-    # plot the figure
-    # plt.figure(figsize=[25, 8])
-    # # plt.scatter(centroids, centroids_y, color='black', label='centroids')
-    # plt.scatter(features, targets, color='blue', label='sampled data')
-    # plt.plot(x, y, color='red', label='sampling function')
-    # plt.title('CSE 5526: Lab 2 Radial Basis Functions')
-    # plt.xlabel('X')
-    # plt.ylabel('Y')
-    # plt.legend()
-    # plt.show()
+            # plot results
+            plt.figure(figsize=[12, 8])
+            plt.plot(x, y, color='black', label='original sampling function')
+            plt.scatter(features, targets, color='red', label='targets')
+            plt.scatter(features, predicted, color='blue',
+                        label='predicted targets')
+            plt.title(
+                'Radial Basis Function Neural Network Function Approximation')
+            plt.text(0.8, 0.1, f'number of clusters = { k }')
+            plt.text(0.8, 0.06, f'learning rate = { learning_rate }')
+            plt.text(0.8, 0.03, f'sse = { sse }')
+            plt.legend()
+            plt.xlabel('X')
+            plt.ylabel('Y')
+            plt.show()
+
+            input()
 
 
 if __name__ == '__main__':
