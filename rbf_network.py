@@ -2,6 +2,7 @@
 import numpy as np
 from sklearn.utils import shuffle
 
+# import custom classes
 from kmeans import Kmeans
 from linear_regression import LinearRegression
 
@@ -18,9 +19,11 @@ class RBFNeuralNetwork():
 
         # instantiate kmeans class to perform kmeans clustering
         self.kmeans = Kmeans(n_clusters=n_clusters, max_epochs=max_epochs)
+
+        # instantiate linear regression class to perform multivariate LMS regression
         self.linear_regression = LinearRegression(n_clusters)
 
-    # compute the gaussian values at each hidden node
+    # compute the gaussian values at each hidden node for all features
     def compute_gaussians(self, features):
         gaussians = np.zeros((features.shape[0], self.n_clusters))
         for i, feature in enumerate(features):
@@ -29,20 +32,18 @@ class RBFNeuralNetwork():
                     (-1 / (2 * variance)) * (np.square(np.linalg.norm(feature - centroid))))
         return gaussians
 
-    # compute the sum of squared errors
-    def compute_sse(self, features, targets):
-        gaussians = self.compute_gaussians(features)
-        outputs = np.dot(gaussians, self.linear_regression.weights) + \
-            self.linear_regression.bias
-        errors = np.square(targets - outputs)
-        return np.sum(errors)
-
-    # predict targets using radial basis function neural network given features
+    # predict targets using radial basis function  given features
     def predict(self, features):
         gaussians = self.compute_gaussians(features)
-        predict = np.dot(gaussians, self.linear_regression.weights) + \
+        predictions = np.dot(gaussians, self.linear_regression.weights) + \
             self.linear_regression.bias
-        return predict
+        return predictions
+
+    # compute the sum of squared errors
+    def compute_sse(self, features, targets):
+        predictions = self.predict(features)
+        errors = np.square(targets - predictions)
+        return np.sum(errors)
 
     # train the hidden layer by means of kmeans clustering
     def train_hidden_layer(self, features):
