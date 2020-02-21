@@ -21,21 +21,20 @@ def main():
     # generate the targets vector with added noise
     targets = 0.5 + 0.4 * np.sin(3 * np.pi * features) + noise
 
+    # test hyperparameters
     n_clusters = [3, 6, 8, 12, 16, 3, 6, 8, 12, 16]
     learning_rates = [0.01, 0.01, 0.01, 0.01,
                       0.01, 0.02, 0.02, 0.02, 0.02, 0.02]
-    sse = []
 
+    # sum of squared errors
+    sse = []
     for i, (learning_rate, clusters) in enumerate(zip(learning_rates, n_clusters)):
         # instantiate radial basis function neural network
         rbf_nn = RBFNeuralNetwork(
             n_clusters=clusters, max_epochs=100, learning_rate=learning_rate)
 
-        # train the hidden layer
-        rbf_nn.train_hidden_layer(features)
-
-        # train the output layer
-        rbf_nn.train_output_layer(features, targets)
+        # train the radial basis function network
+        rbf_nn.train(features, targets)
 
         # predict the targets given the features
         predicted = rbf_nn.predict(features)
