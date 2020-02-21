@@ -24,11 +24,11 @@ class RBFNeuralNetwork():
         self.kmeans.train(features)
 
     # compute the gaussian values at each hidden node
-    def compute_gaussians(self, x):
+    def compute_gaussians(self, feature):
         gaussians = np.zeros((self.n_clusters, 1))
         for k, (centroid, variance) in enumerate(zip(self.kmeans.centroids, self.kmeans.variance)):
             gaussians[k] = np.exp((-1 / (2 * variance))
-                                  * (np.square(np.linalg.norm(x - centroid))))
+                                  * (np.square(np.linalg.norm(feature - centroid))))
         return gaussians
 
     # compute the sum of squared errors

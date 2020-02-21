@@ -21,45 +21,50 @@ def main():
     # generate the targets vector with added noise
     targets = 0.5 + 0.4 * np.sin(3 * np.pi * features) + noise
 
-    n_clusters = [3, 6, 8, 12, 16]
-    learning_rates = [0.01, 0.02]
+    n_clusters = [3, 6, 8, 12, 16, 3, 6, 8, 12, 16]
+    learning_rates = [0.01, 0.01, 0.01, 0.01,
+                      0.01, 0.02, 0.02, 0.02, 0.02, 0.02]
+    sse = []
 
-    for learning_rate in learning_rates:
-        for k in n_clusters:
+    for i, (learning_rate, clusters) in enumerate(zip(learning_rates, n_clusters)):
+        # instantiate radial basis function neural network
+        rbf_nn = RBFNeuralNetwork(
+            n_clusters=clusters, max_epochs=100, learning_rate=learning_rate)
 
-            # instantiate radial basis function neural network
-            rbf_nn = RBFNeuralNetwork(
-                n_clusters=k, max_epochs=100, learning_rate=learning_rate)
+        # train the hidden layer
+        rbf_nn.train_hidden_layer(features)
 
-            # train the hidden layer
-            rbf_nn.train_hidden_layer(features)
+        # train the output layer
+        rbf_nn.train_output_layer(features, targets)
 
-            # train the output layer
-            rbf_nn.train_output_layer(features, targets)
+        # predict the targets given the features
+        predicted = rbf_nn.predict(features)
 
-            # predict the targets given the features
-            predicted = rbf_nn.predict(features)
+        # compute the sum of squared errors
+        sse.append(rbf_nn.compute_sse(features, targets).item())
 
-            # compute the sum of squared errors
-            sse = rbf_nn.compute_sse(features, targets).item()
+        # plot results
+        plt.figure(figsize=[12, 8])
+        plt.plot(x, y, color='black', label='original sampling function')
+        plt.scatter(features, targets, color='red', label='targets')
+        plt.scatter(features, predicted, color='blue',
+                    label='predicted targets')
+        plt.title(
+            'Radial Basis Function Neural Network Function Approximation')
+        plt.text(0.8, 0.1, f'number of clusters = { clusters }')
+        plt.text(0.8, 0.067, f'learning rate = { learning_rate }')
+        plt.text(0.8, 0.033, f'sse = { sse[i] }')
+        plt.legend()
+        plt.xlabel('X')
+        plt.ylabel('Y')
+        plt.show()
 
-            # plot results
-            plt.figure(figsize=[12, 8])
-            plt.plot(x, y, color='black', label='original sampling function')
-            plt.scatter(features, targets, color='red', label='targets')
-            plt.scatter(features, predicted, color='blue',
-                        label='predicted targets')
-            plt.title(
-                'Radial Basis Function Neural Network Function Approximation')
-            plt.text(0.8, 0.1, f'number of clusters = { k }')
-            plt.text(0.8, 0.06, f'learning rate = { learning_rate }')
-            plt.text(0.8, 0.03, f'sse = { sse }')
-            plt.legend()
-            plt.xlabel('X')
-            plt.ylabel('Y')
-            plt.show()
-
-            input()
+    print('---------------------------------------------TEST RESULTS---------------------------------------------')
+    print('{:^25s} {:^25s} {:^25s} {:^25s}'.format(
+        'test', 'learning rate', 'number of clusters', 'sum of squared errors'))
+    for i, (learning_rate, clusters, sse) in enumerate(zip(learning_rates, n_clusters, sse)):
+        print('{:^25d} {:^25.3f} {:^25d} {:^25.5f}'.format(
+            i, learning_rate, clusters, sse))
 
 
 if __name__ == '__main__':

@@ -12,6 +12,7 @@ class Kmeans():
         self.centroids = np.zeros(n_clusters)  # centroid of each cluster
         self.variance = np.zeros(n_clusters)  # variance of each cluster
         self.error = 0  # sum of squared errors
+        self.max_centroid_distance = 0
 
     # initialize the starting centroids
     def initialize_centroids(self, features):
@@ -52,6 +53,18 @@ class Kmeans():
             variance[k] = np.var(features[clusters == k])
         variance[variance == 0] = np.mean(variance)
         return variance
+
+    # compute maximum centroid distance
+    def compute_max_centroid_distance(self):
+        max_distance = 0
+        for centroid_1 in self.centroids:
+            for centroid_2 in self.centroids:
+                if centroid_1 != centroid_2:
+                    distance = np.linalg.norm(centroid_1 - centroid_2)
+
+                    if distance > max_distance:
+                        max_distance = distance
+        return max_distance
 
     # train the kmeans algorithm
     def train(self, features):
