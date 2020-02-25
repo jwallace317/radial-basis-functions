@@ -25,19 +25,20 @@ def main():
     n_clusters = [3, 6, 8, 12, 16, 3, 6, 8, 12, 16]
     learning_rates = [0.01, 0.01, 0.01, 0.01,
                       0.01, 0.02, 0.02, 0.02, 0.02, 0.02]
+    max_epochs = 100
 
     # sum of squared errors
     sse = []
     for i, (learning_rate, clusters) in enumerate(zip(learning_rates, n_clusters)):
         # instantiate radial basis function neural network
         rbf_nn = RBFNeuralNetwork(
-            n_clusters=clusters, max_epochs=100, learning_rate=learning_rate)
+            n_clusters=clusters, max_epochs=max_epochs, learning_rate=learning_rate)
 
         # train the radial basis function network
         rbf_nn.train(features, targets)
 
         # predict the targets given the features
-        predicted = rbf_nn.predict(features)
+        predicted = rbf_nn.predict(x)
 
         # compute the sum of squared errors
         sse.append(rbf_nn.compute_sse(features, targets).item())
@@ -46,10 +47,8 @@ def main():
         plt.figure(figsize=[12, 8])
         plt.plot(x, y, color='black', label='original sampling function')
         plt.scatter(features, targets, color='red', label='targets')
-        plt.scatter(features, predicted, color='blue',
-                    label='predicted targets')
-        plt.title(
-            'Radial Basis Function Neural Network Function Approximation')
+        plt.plot(x, predicted, color='blue', label='predicted targets')
+        plt.title('Radial Basis Function Neural Network Function Approximation')
         plt.text(0.8, 0.1, f'number of clusters = { clusters }')
         plt.text(0.8, 0.067, f'learning rate = { learning_rate }')
         plt.text(0.8, 0.033, f'sse = { sse[i] }')
@@ -58,12 +57,12 @@ def main():
         plt.ylabel('Y')
         plt.show()
 
-    print('---------------------------------------------TEST RESULTS---------------------------------------------')
-    print('{:^25s} {:^25s} {:^25s} {:^25s}'.format(
-        'test', 'learning rate', 'number of clusters', 'sum of squared errors'))
+    print('-----------------------------------------------------------TEST RESULTS------------------------------------------------------------')
+    print('{:^25s} {:^25s} {:^25s} {:^25s} {:^25s}'.format(
+        'test', 'learning rate', 'max epochs', 'number of clusters', 'sum of squared errors'))
     for i, (learning_rate, clusters, sse) in enumerate(zip(learning_rates, n_clusters, sse)):
-        print('{:^25d} {:^25.3f} {:^25d} {:^25.5f}'.format(
-            i, learning_rate, clusters, sse))
+        print('{:^25d} {:^25.3f} {:^25d} {:^25d} {:^25.5f}'.format(
+            i, learning_rate, max_epochs, clusters, sse))
 
 
 if __name__ == '__main__':

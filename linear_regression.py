@@ -15,12 +15,14 @@ class LinearRegression():
             features, targets = shuffle(features, targets)
 
             for feature, target in zip(features, targets):
+                feature = feature.reshape(features.shape[1], 1)
+
                 linear_combination = np.dot(
                     feature.T, self.weights) + self.bias
 
                 # backpropagation
                 error = target - linear_combination
 
+                # LMS weight update
                 self.bias += learning_rate * error
-                self.weights += (learning_rate * error *
-                                 feature).reshape(feature.shape[0], 1)
+                self.weights += learning_rate * error * feature
