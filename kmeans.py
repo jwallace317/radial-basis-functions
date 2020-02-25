@@ -6,11 +6,12 @@ import numpy as np
 class Kmeans():
 
     # initialize kmeans
-    def __init__(self, n_clusters, max_epochs):
+    def __init__(self, n_clusters, max_epochs, intra_cluster_variance):
         self.n_clusters = n_clusters  # number of clusters
         self.max_epochs = max_epochs  # max number of epochs for training
         self.centroids = np.zeros(n_clusters)  # centroid of each cluster
         self.variance = np.zeros(n_clusters)  # variance of each cluster
+        self.intra_cluster_variance = intra_cluster_variance
         self.sse = 0  # sum of squared errors
 
     # initialize the starting centroids
@@ -55,7 +56,22 @@ class Kmeans():
         variance[variance == 0] = np.mean(variance)
         return variance
 
+    def compute_constant_variance(self, centroids):
+        max_distance = 0
+        for i in range(self.n_clusters):
+            for j in range(self.n_clusters):
+                distance = np.linalg.norm(centroids[i] - centroids[j])
+
+                if distance > max_distance:
+                    max_distance = distance
+
+        variance = np.ones(self.n_clusters) * \
+            np.square(max_distance / np.sqrt(2 * self.n_clusters))
+
+        return variance
+
     # train the kmeans algorithm
+
     def train(self, features):
         self.centroids = self.initialize_centroids(features)
         for i in range(self.max_epochs):
@@ -68,4 +84,10 @@ class Kmeans():
                 break
 
         self.sse = self.compute_sse(features, clusters, self.centroids)
-        self.variance = self.compute_variance(features, clusters)
+
+        if self.intra_cluster_variance is True:
+            # compute intra cluster variance
+            self.variance = self.compute_variance(features, clusters)
+        else:
+            # compute constant variance
+            self.variance = self.compute_constant_variance(self.centroids)
